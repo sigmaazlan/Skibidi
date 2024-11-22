@@ -1,0 +1,90 @@
+import pygame
+import random
+import sys
+
+# Initialize pygame
+pygame.init()
+
+# Screen dimensions
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Fruit Catcher")
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+
+# Basket properties
+basket_width, basket_height = 100, 20
+basket_x = WIDTH // 2 - basket_width // 2
+basket_y = HEIGHT - 50
+basket_speed = 10
+
+# Fruit properties
+fruit_width, fruit_height = 30, 30
+fruit_x = random.randint(0, WIDTH - fruit_width)
+fruit_y = -fruit_height
+fruit_speed = 5
+
+# Game variables
+score = 0
+font = pygame.font.Font(None, 36)
+clock = pygame.time.Clock()
+
+# Main game loop
+def main():
+    global basket_x, fruit_x, fruit_y, score
+
+    running = True
+    while running:
+        screen.fill(WHITE)
+
+        # Event handling
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        # Basket movement
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT] and basket_x > 0:
+            basket_x -= basket_speed
+        if keys[pygame.K_RIGHT] and basket_x < WIDTH - basket_width:
+            basket_x += basket_speed
+
+        # Fruit movement
+        fruit_y += fruit_speed
+        if fruit_y > HEIGHT:
+            fruit_y = -fruit_height
+            fruit_x = random.randint(0, WIDTH - fruit_width)
+
+        # Collision detection
+        if (fruit_y + fruit_height > basket_y and
+            basket_x < fruit_x < basket_x + basket_width):
+            score += 1
+            fruit_y = -fruit_height
+            fruit_x = random.randint(0, WIDTH - fruit_width)
+
+        # Draw basket
+        pygame.draw.rect(screen, BLUE, (basket_x, basket_y, basket_width, basket_height))
+
+        # Draw fruit
+        pygame.draw.ellipse(screen, RED, (fruit_x, fruit_y, fruit_width, fruit_height))
+
+        # Draw score
+        score_text = font.render(f"Score: {score}", True, BLACK)
+        screen.blit(score_text, (10, 10))
+
+        # Update display
+        pygame.display.flip()
+
+        # Cap the frame rate
+        clock.tick(30)
+
+    pygame.quit()
+    sys.exit()
+
+if __name__ == "__main__":
+    main()
