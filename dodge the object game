@@ -1,0 +1,114 @@
+import pygame
+import random
+
+# Initialize pygame
+pygame.init()
+
+# Colors
+white = (255, 255, 255)
+blue = (50, 153, 213)
+red = (213, 50, 80)
+green = (0, 255, 0)
+black = (0, 0, 0)
+
+# Display settings
+width = 400
+height = 600
+screen = pygame.display.set_mode((width, height))
+pygame.display.set_caption('Dodge the Falling Objects')
+
+# Game settings
+player_width = 50
+player_height = 50
+player_speed = 10
+object_width = 50
+object_height = 50
+fall_speed = 7
+
+# Font settings
+font_style = pygame.font.SysFont("bahnschrift", 25)
+
+# Player function
+def draw_player(x, y):
+    pygame.draw.rect(screen, green, [x, y, player_width, player_height])
+
+# Falling object function
+def draw_object(x, y):
+    pygame.draw.rect(screen, red, [x, y, object_width, object_height])
+
+# Main game function
+def gameLoop():
+    # Game settings
+    game_over = False
+    game_close = False
+
+    # Initial player position
+    player_x = width / 2
+    player_y = height - player_height - 10
+
+    # Object settings
+    object_x = random.randint(0, width - object_width)
+    object_y = -object_height
+    object_speed = fall_speed
+
+    # Movement
+    x_change = 0
+
+    while not game_over:
+
+        while game_close:
+            screen.fill(blue)
+            message = font_style.render("You Lost! Press C-Play Again or Q-Quit", True, white)
+            screen.blit(message, [width / 6, height / 3])
+            pygame.display.update()
+
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        game_over = True
+                        game_close = False
+                    if event.key == pygame.K_c:
+                        gameLoop()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                game_over = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    x_change = -player_speed
+                elif event.key == pygame.K_RIGHT:
+                    x_change = player_speed
+
+        # Game Over condition
+        if player_x + x_change < 0 or player_x + x_change > width - player_width:
+            x_change = 0
+
+        # Update player position
+        player_x += x_change
+
+        # Update falling object
+        object_y += object_speed
+
+        # If object goes off-screen, reset it to the top
+        if object_y > height:
+            object_y = -object_height
+            object_x = random.randint(0, width - object_width)
+
+        # Check for collision
+        if player_y < object_y + object_height and player_y + player_height > object_y:
+            if player_x < object_x + object_width and player_x + player_width > object_x:
+                game_close = True
+
+        # Update the screen
+        screen.fill(blue)
+        draw_player(player_x, player_y)
+        draw_object(object_x, object_y)
+
+        pygame.display.update()
+
+        # Set game speed
+        pygame.time.Clock().tick(30)
+
+    pygame.quit()
+
+gameLoop()
